@@ -5,7 +5,7 @@ import java.util.StringTokenizer;
 class IPParse{
 
 	public static void main(String[] args){
-	  String [] = new String[4];
+	  int []octets = new int[4];
 	  if(args.length == 0){
 	    System.out.println("please enter IP address");
 	    return;
@@ -20,6 +20,7 @@ class IPParse{
 	    return;
 	  }
 	  StringTokenizer tkn = new StringTokenizer(args[0], ".");
+	  int i = 0;
 	  while(tkn.hasMoreTokens()){
 	    try{
 	        String token = tkn.nextToken();
@@ -27,13 +28,20 @@ class IPParse{
 	        if(asInt < 0 || asInt > 255){
 	          System.out.println("Error: invalid octet detected");
 	          System.out.println(args[0]);
-	          System.out.println(" ".repeat(args[0].indexOf(token)) + "^".repeat(token.length()));
+	          System.out.println(Estring.stringRepeat(" ", args[0].indexOf(token)) + Estring.stringRepeat("^", token.length()));
 	          return;
 	        }
-        		System.out.println(asInt);
+			octets[i] = asInt;
+			i++;
 	    }catch(NumberFormatException e){
 	      System.out.println("Error: bad IP address");
 	    }
 	  }
+	  System.out.println(Estring.stringRepeat("=", args[0].length()));
+	  System.out.println(args[0]);
+	  for(int octet: octets){
+	    System.out.println(octet);
+	  }
+	  System.out.println(Estring.stringRepeat("=", args[0].length()));
 	}
 }

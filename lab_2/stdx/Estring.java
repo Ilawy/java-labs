@@ -8,6 +8,14 @@ import java.util.Arrays;
 
 public class Estring{
 
+	public static String stringRepeat(String str, int times){
+		String result = "";
+		for(int i = 0; i < times; i++){
+			result += str;
+		}
+		return result;
+	}
+
 	public static int FindOccurs(String str, String target){
 		System.out.println(Arrays.toString(str.split(target, -1)) + " " +  str.split(target, -1).length);
 		return str.split(target, -1).length - 1;
@@ -40,7 +48,7 @@ public class Estring{
 		int result = 0;
 		StringTokenizer st1 = new StringTokenizer(str, target);
 		System.out.println(st1.countTokens());
-		return st1.countTokens();
+		return st1.countTokens() - 1;
 	}
 	
 }

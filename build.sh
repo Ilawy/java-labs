@@ -1,0 +1,1 @@
+javac lab_*/*.java
