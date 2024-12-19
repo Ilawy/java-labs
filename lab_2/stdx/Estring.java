@@ -2,7 +2,6 @@ package stdx;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.StringTokenizer;
-import java.util.Arrays;
 
 
 
@@ -16,12 +15,11 @@ public class Estring{
 		return result;
 	}
 
-	public static int FindOccurs(String str, String target){
-		System.out.println(Arrays.toString(str.split(target, -1)) + " " +  str.split(target, -1).length);
+	public static int findOccurs(String str, String target){
 		return str.split(target, -1).length - 1;
 	}
 
-	public static int FindOccurs3(String str, String target){
+	public static int findOccurs3(String str, String target){
 			Pattern pattern = Pattern.compile(target);
 			Matcher matcher = pattern.matcher(str);
 			int result = 0;
@@ -31,24 +29,26 @@ public class Estring{
 			return result;
 	}
 
-	public static int FindOccurs2(String str, String target){
+	public static int findOccurs2(String str, String target){
 			int result = 0;
 			int left = 0;
 			while(left < str.length()){
 				int val = str.substring(left).indexOf(target);
 				if(val == -1) break;
-				// System.out.println(val + " " + target);
 				left += val+target.length();
 				result++;
 			}
 			return result;
 	}
 
-	public static int FindOccurs4(String str, String target){
+	public static int findOccurs4(String str, String target){
 		int result = 0;
-		StringTokenizer st1 = new StringTokenizer(str, target);
-		System.out.println(st1.countTokens());
-		return st1.countTokens() - 1;
+		StringTokenizer st1 = new StringTokenizer(str, " ");
+		while (st1.hasMoreTokens()){
+			String tok = st1.nextToken();
+			if(tok.equals(target))result++;
+		}
+		return result;
 	}
 	
 }

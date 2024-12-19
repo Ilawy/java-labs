@@ -13,20 +13,20 @@ class StringSplit{
 				System.out.println("non or 2 arguments are required");
 				return;
 			}else{
-				paragraph = "ITIITI ITI ITI develops people and ITI house of developers and ITI for people";
+				paragraph = "ITI ITI ITI ITI develops people and ITI house of developers and ITI for people";
 				target = "ITI";
 			}
 		}
-		System.out.println(paragraph + ", " + target);
-		int result = Estring.FindOccurs(paragraph, target);
-		int result2 = Estring.FindOccurs2(paragraph, target);
-		int result3 = Estring.FindOccurs3(paragraph, target);
-		int result4 = Estring.FindOccurs4(paragraph, target);
+		int result = Estring.findOccurs(paragraph, target);
+		int result2 = Estring.findOccurs2(paragraph, target);
+		int result3 = Estring.findOccurs3(paragraph, target);
+		int result4 = Estring.findOccurs4(paragraph, target);
 
-		System.out.println("Result 1: " + result);
-		System.out.println("Result 2: " + result2);
-		System.out.println("Result 3: " + result3);
-		System.out.println("Result 4: " + result4);
+		System.out.println("Splitting by target: " + result);
+		System.out.println("Using indexof: " + result2);
+		System.out.println("Using pattern matching: " + result3);
+		System.out.println("=======(exact match)======");
+		System.out.println("Using space as delimiter: " + result4);
 
 	}
 }
