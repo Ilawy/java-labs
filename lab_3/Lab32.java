@@ -8,8 +8,6 @@ import java.util.List;
 
 
 public class Lab32 {
-
-    
   
     public static void main(String[] args){
       if(args.length != 3){

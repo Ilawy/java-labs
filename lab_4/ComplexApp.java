@@ -12,6 +12,23 @@ public class ComplexApp {
             return new Complex<Double>(real, img);
         }
 
+        T getReal(){
+            return this.real;
+        }
+        
+        T getImg(){
+            return this.img;
+        }
+
+        void setReal(T real){
+            this.real = real;
+        }
+        
+        void setImg(T img){
+            this.img = img;
+        }
+
+        @Override
         public String toString(){
             return String.format("%d%s%s", real, (img.doubleValue() <= 0) ? "" : "+", img.doubleValue() == 0 ? "" : img.toString());
         }
