@@ -3,10 +3,14 @@ package liblib;
 abstract public class LibItem {
     protected int id;
     protected String title;
-
-    public LibItem(int id, String title){
-        this.id = id;
+    protected int stock = 5;
+    protected String category = "General";
+    public LibItem(String title){
         this.title = title;
+    }
+
+    public void setID(int id){
+        this.id = id;
     }
 
     protected String wrapDetails(String details){

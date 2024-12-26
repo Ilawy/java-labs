@@ -1,17 +1,17 @@
 package liblib;
 
 public class Book extends LibItem {
-    private String author;
+    public String author;
     private String category;
     
     public Book(int id, String title, String author, String category){
-        super(id, title);
+        super(title);
         this.author = author;
         this.category = category;
     }
     
-    public Book(int id, String title, String author){
-        super(id, title);
+    public Book(String title, String author){
+        super(title);
         this.author = author;
         this.category = "General";
     }

@@ -4,6 +4,7 @@ public class Client {
     private String name;
     private int age;
     private String email;
+    private int id;
 
     public Client(String name, int age, String email){
         this.name = name;
@@ -11,7 +12,13 @@ public class Client {
         this.email = email;
     }
 
+    public void setID(int id){
+        this.id = id;
+    }
 
+    public int getID(){
+        return id;
+    }
 
     public int getAge() {
         return age;
