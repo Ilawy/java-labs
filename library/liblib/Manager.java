@@ -1,8 +1,10 @@
 package liblib;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.management.relation.RelationNotFoundException;
@@ -34,6 +36,7 @@ public class Manager {
     }
 
     // -------- client ------------
+    //#region client
     public Optional<Client> getClientByID(int id) {
         if (clients.containsKey(id)) {
             return Optional.of(clients.get(id));
@@ -46,6 +49,13 @@ public class Manager {
         c.setID(newid);
         clients.put(newid, c);
     }
+
+    public List<Relation> getRelationsByClientID(int clientID){
+        return relations.stream().filter(rel->rel.userID == clientID).collect(Collectors.toList());
+    }
+
+    //#endregion client
+
 
     public void removeClient(Client c) throws ItemAlreadyExists {
         if (!getClientByID(c.getID()).isPresent()) {

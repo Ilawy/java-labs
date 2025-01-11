@@ -5,9 +5,12 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
 import javax.swing.plaf.DimensionUIResource;
 
 import liblib.exceptions.DuplicateIdException;
@@ -19,17 +22,35 @@ import liblib.exceptions.RelationAlreadyExists;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 
 public class GUI extends JFrame {
     private JPanel currentActivity;
 
     Manager manager;
 
-    // ----------utils-------------
+    //#region UTILS
     private boolean isTextFieldEmpty(JTextField tf) {
         return tf.getText().isEmpty();
     }
+    private void switchActivitiy(GuiActivity activity) {
+        if (this.currentActivity != null) {
+            this.getContentPane().remove(this.currentActivity);
+        }
+        this.currentActivity = activity.run();
+        this.getContentPane().add(this.currentActivity);
+        this.revalidate();
+        this.repaint();
+    }
+    
+    private boolean isValidEmail(String test){
+        return test.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
+    }
+  
+    //#endregion
 
+
+    //#region HOME
     JPanel dummy_screen() {
         JPanel root = new JPanel();
         this.setSize(600, 400);
@@ -88,7 +109,7 @@ public class GUI extends JFrame {
         addClientButton.addActionListener(e -> {
             switchActivitiy(this::add_client_screen);
         });
-       
+
         JButton listClientsButton = new JButton("List Clients");
         listClientsButton.addActionListener(e -> {
             switchActivitiy(this::client_table_screen);
@@ -102,6 +123,10 @@ public class GUI extends JFrame {
         return root;
     }
 
+    //#endregion
+
+
+    //#region ITEMS
     JPanel add_book_screen() {
         JPanel root = new JPanel(new GridLayout(0, 1, 0, 0)); // One column, dynamic rows, with spacing
 
@@ -133,7 +158,7 @@ public class GUI extends JFrame {
                 return;
             }
             if (isTextFieldEmpty(authorField)) {
-                Border border = BorderFactory.createLineBorder(Color.RED, 2); 
+                Border border = BorderFactory.createLineBorder(Color.RED, 2);
                 authorField.setBorder(border);
                 return;
             }
@@ -169,22 +194,28 @@ public class GUI extends JFrame {
             if (item instanceof Book) {
                 author = ((Book) item).author;
             }
-            data.add(Arrays.asList(String.format("%d", item.id), item.title, author));
+            data.add(Arrays.asList(String.format("%d", item.id), item.title, author, String.format("%d", item.stock)));
         });
         String[] columnNames = {
                 "ID",
-                "Title",
-                "Author"
+                "title",
+                "author",
+                "stock"
         };
 
         JTable table = new JTable(liblib.Utils.to2DStringArray(data), columnNames);
+        JScrollPane scrollPane = new JScrollPane(table);
 
         root.add(backButton);
-        root.add(table);
+        root.add(scrollPane);
 
         return root;
     }
 
+    //#endregion
+
+
+    //#region RELATIONS
     JPanel borrow_screen() {
         JPanel root = new JPanel(new GridLayout(0, 1, 0, 0)); // One column, dynamic rows, with spacing
 
@@ -217,7 +248,7 @@ public class GUI extends JFrame {
                 return;
             }
             if (isTextFieldEmpty(itemField)) {
-                Border border = BorderFactory.createLineBorder(Color.RED, 2); 
+                Border border = BorderFactory.createLineBorder(Color.RED, 2);
                 itemField.setBorder(border);
                 return;
             }
@@ -248,7 +279,12 @@ public class GUI extends JFrame {
 
         return root;
     }
+    //#endregion
 
+
+
+
+    //#region CLIENT
     JPanel add_client_screen() {
         JPanel root = new JPanel(new GridLayout(0, 1, 0, 0));
         JLabel status = new JLabel();
@@ -288,13 +324,17 @@ public class GUI extends JFrame {
                 return;
             }
             if (isTextFieldEmpty(ageTextField)) {
-                Border border = BorderFactory.createLineBorder(Color.RED, 2); 
+                Border border = BorderFactory.createLineBorder(Color.RED, 2);
                 ageTextField.setBorder(border);
                 return;
             }
             if (isTextFieldEmpty(emailTextField)) {
-                Border border = BorderFactory.createLineBorder(Color.RED, 2); 
+                Border border = BorderFactory.createLineBorder(Color.RED, 2);
                 emailTextField.setBorder(border);
+                return;
+            }
+            if(!isValidEmail(email)){
+                status.setText("Invalid email");
                 return;
             }
             try {
@@ -302,7 +342,7 @@ public class GUI extends JFrame {
                 switchActivitiy(this::home_screen);
             } catch (NumberFormatException error) {
                 status.setText("Age is not valid");
-            }catch (ItemAlreadyExists error) {
+            } catch (ItemAlreadyExists error) {
                 status.setText("Client with this email already exists");
             }
         });
@@ -316,11 +356,10 @@ public class GUI extends JFrame {
         root.add(emailPanel);
         root.add(namePanel);
 
-        root.add(new Label("hello world"));
+        root.add(status);
 
         return root;
     }
-
 
     JPanel client_table_screen() {
         JPanel root = new JPanel();
@@ -332,32 +371,68 @@ public class GUI extends JFrame {
 
         ArrayList<java.util.List<String>> data = new ArrayList<>();
         manager.clients.values().forEach(client -> {
-            data.add(Arrays.asList(String.format("%d", client.getID()), client.getName(), String.format("%d", client.getAge()), client.getEmail()));
+            data.add(Arrays.asList(String.format("%d", client.getID()), client.getName(),
+                    String.format("%d", client.getAge()), client.getEmail(), String.format("%d", manager.getRelationsByClientID(client.getID()).size())));
         });
         String[] columnNames = {
                 "ID",
-                "Name",
-                "Age",
-                "Email"
+                "name",
+                "age",
+                "email",
+                "borrowed"
         };
 
         JTable table = new JTable(liblib.Utils.to2DStringArray(data), columnNames);
+        JScrollPane scrollPane = new JScrollPane(table);
+        table.getDefaultEditor(Object.class).addCellEditorListener(new CellEditorListener() {
+            public void editingStopped(ChangeEvent e) {
+                int row = table.getSelectedRow();
+                int col = table.getSelectedColumn();
 
+                String edited_id = (String) table.getValueAt(row, 0);
+                String new_value = (String) table.getValueAt(row, col);
+                int id = Integer.parseInt(edited_id);
+                String column_name = (String) table.getColumnName(col);
+                Optional<Client> clientOpt = manager.getClientByID(id);
+                Client client = clientOpt.get();
+                // TODO handle case where client not found
+                System.out.println(column_name);
+                switch (column_name) {
+                    case "name":
+                        client.setName(new_value);
+                        switchActivitiy(GUI.this::client_table_screen);
+                        break;
+                    case "age":
+                        client.setAge(Integer.parseInt(new_value));
+                        switchActivitiy(GUI.this::client_table_screen);
+                        break;
+                    default:
+                        System.out.println("BAD COL");
+                }
+
+                System.out.format("%s\n", edited_id);
+
+                if (row >= 0 && col >= 0) {
+                    Object value = table.getValueAt(row, col);
+                    System.out.println("Cell editing stopped: row=" + row + ", col=" + col + ", value=" + value);
+                } else {
+                    System.out.println("Cell editing stopped, but row or column is invalid.");
+                }
+            }
+
+            public void editingCanceled(ChangeEvent e) {
+            }
+        });
         root.add(backButton);
-        root.add(table);
+        root.add(scrollPane);
         return root;
     }
 
-    private void switchActivitiy(GuiActivity activity) {
-        if (this.currentActivity != null) {
-            this.getContentPane().remove(this.currentActivity);
-        }
-        this.currentActivity = activity.run();
-        this.getContentPane().add(this.currentActivity);
-        this.revalidate();
-        this.repaint();
-    }
+    //#endregion
 
+    
+
+    //#region CTOR
     public GUI() {
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.manager = new Manager();
@@ -365,10 +440,14 @@ public class GUI extends JFrame {
         try {
             manager.addClient(new Client("Mohammed Amr", 24, "next.mohammed.amr@gmail.com"));
             manager.addClient(new Client("Mohammed Amr", 24, "next.mohammed.amr@gmail.com"));
-            // manager.addClient(new Client("Fares Edres", 24, "next.mohammed.amr@gmail.com"));
-            // manager.addClient(new Client("Osama Ismail", 24, "next.mohammed.amr@gmail.com"));
-            // manager.addClient(new Client("Mahmoud Elbanna", 24, "next.mohammed.amr@gmail.com"));
-            // manager.addClient(new Client("Ahmed Ramadan", 24, "next.mohammed.amr@gmail.com"));
+            // manager.addClient(new Client("Fares Edres", 24,
+            // "next.mohammed.amr@gmail.com"));
+            // manager.addClient(new Client("Osama Ismail", 24,
+            // "next.mohammed.amr@gmail.com"));
+            // manager.addClient(new Client("Mahmoud Elbanna", 24,
+            // "next.mohammed.amr@gmail.com"));
+            // manager.addClient(new Client("Ahmed Ramadan", 24,
+            // "next.mohammed.amr@gmail.com"));
 
             manager.addItem(new Book("Noone can be found", "Me"));
             manager.addItem(new Book("MM", "Me"));
@@ -376,32 +455,24 @@ public class GUI extends JFrame {
 
             manager.borrowItem(0, 0);
 
-            System.out.format("LOL: %d", manager.relations.size());
-            
-        } 
-        catch(ItemAlreadyExists err){
+        } catch (ItemAlreadyExists err) {
             System.out.println(err);
-        }
-        catch(DuplicateIdException error){
+        } catch (DuplicateIdException error) {
             System.out.println(
-                error.getMessage() + "AA"
-            );
-        }catch(ItemNotFoundException err){
+                    error.getMessage() + "AA");
+        } catch (ItemNotFoundException err) {
             System.out.println(err.getMessage());
-        }catch(RelationAlreadyExists err){
-            System.out.println(err.getMessage());   
-        }
-        catch(ItemNotAvailable err){
-            System.out.println(err.getClass().getName());   
+        } catch (RelationAlreadyExists err) {
+            System.out.println(err.getMessage());
+        } catch (ItemNotAvailable err) {
+            System.out.println(err.getClass().getName());
         }
 
         this.setBounds(50, 50, 600, 400);
 
-
         boolean CHANGE_ME_TO_START_DUMMY_UI = false;
 
-
-        switchActivitiy(CHANGE_ME_TO_START_DUMMY_UI ? this::dummy_screen : this::client_table_screen);
+        switchActivitiy(CHANGE_ME_TO_START_DUMMY_UI ? this::dummy_screen : this::home_screen);
 
         this.setVisible(true);
 
